@@ -1,15 +1,19 @@
 package com.example.easynotes;
 
+import com.example.easynotes.model.Address;
 import com.example.easynotes.model.Employee;
 import com.example.easynotes.model.EmployeeIdentity;
 import com.example.easynotes.model.Gender;
 import com.example.easynotes.model.Movie;
+import com.example.easynotes.model.Name;
+import com.example.easynotes.model.Person;
 import com.example.easynotes.model.Post;
 import com.example.easynotes.model.Tag;
 import com.example.easynotes.model.User;
 import com.example.easynotes.model.UserProfile;
 import com.example.easynotes.repository.EmployeeRepository;
 import com.example.easynotes.repository.MovieRepository;
+import com.example.easynotes.repository.PersonRepository;
 import com.example.easynotes.repository.TagRepository;
 import com.example.easynotes.repository.UserProfileRepository;
 import com.example.easynotes.repository.UserRepository;
@@ -21,6 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.util.Calendar;
+import java.util.Optional;
 
 @SpringBootApplication
 @EnableJpaAuditing
@@ -44,6 +49,9 @@ public class EasyNotesApplication implements CommandLineRunner {
 	@Autowired
 	private EmployeeService employeeService;
 
+	@Autowired
+	private PersonRepository personRepository;
+
 	public static void main(String[] args) {
 		SpringApplication.run(EasyNotesApplication.class, args);
 	}
@@ -53,6 +61,22 @@ public class EasyNotesApplication implements CommandLineRunner {
 		oneToOneExample();
 		manyToManyExample();
 		compositePrimaryKeyExample();
+		embeddableExample();
+	}
+
+	private void embeddableExample() {
+		// Cleanup the users table
+		personRepository.deleteAllInBatch();
+
+		// Insert a new user in the database
+		Name name = new Name("Rajeev", "Kumar", "Singh");
+		Address address = new Address("747", "Golf View Road", "Bangalore", "Karnataka", "India", "560008");
+		Person user = new Person(name, "rajeev@callicoder.com", address);
+
+		personRepository.save(user);
+
+		Optional<Person> personFound = personRepository.findByNameLastName("Singh").stream().findFirst();
+		System.out.println(personFound.get().getAddress().getAddressLine2());
 	}
 
 	private void compositePrimaryKeyExample() {
