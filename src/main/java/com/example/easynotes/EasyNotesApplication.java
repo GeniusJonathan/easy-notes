@@ -1,6 +1,7 @@
 package com.example.easynotes;
 
 import com.example.easynotes.model.Address;
+import com.example.easynotes.model.Company;
 import com.example.easynotes.model.Employee;
 import com.example.easynotes.model.EmployeeIdentity;
 import com.example.easynotes.model.Gender;
@@ -11,6 +12,7 @@ import com.example.easynotes.model.Post;
 import com.example.easynotes.model.Tag;
 import com.example.easynotes.model.User;
 import com.example.easynotes.model.UserProfile;
+import com.example.easynotes.repository.CompanyRepository;
 import com.example.easynotes.repository.EmployeeRepository;
 import com.example.easynotes.repository.MovieRepository;
 import com.example.easynotes.repository.PersonRepository;
@@ -25,7 +27,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @SpringBootApplication
 @EnableJpaAuditing
@@ -52,6 +56,9 @@ public class EasyNotesApplication implements CommandLineRunner {
 	@Autowired
 	private PersonRepository personRepository;
 
+	@Autowired
+	private CompanyRepository companyRepository;
+
 	public static void main(String[] args) {
 		SpringApplication.run(EasyNotesApplication.class, args);
 	}
@@ -62,6 +69,35 @@ public class EasyNotesApplication implements CommandLineRunner {
 		manyToManyExample();
 		compositePrimaryKeyExample();
 		embeddableExample();
+		elementCollectionExample();
+	}
+
+	private void elementCollectionExample() {
+		// Cleanup companies table
+		companyRepository.deleteAll();
+
+		// Insert company with multiple phonenumbers and addresses
+		Set<String> phoneNumbers = new HashSet<>();
+		phoneNumbers.add("+91-9999999999");
+		phoneNumbers.add("+91-9898989898");
+
+		Set<Address> addresses = new HashSet<>();
+		addresses.add(new Address("747", "Golf View Road", "Bangalore",
+				"Karnataka", "India", "560008"));
+		addresses.add(new Address("Plot No 44", "Electronic City", "Bangalore",
+				"Karnataka", "India", "560001"));
+
+		Company company = new Company("Rajeev Kumar Singh", "rajeev@callicoder.com",
+				phoneNumbers, addresses);
+
+		companyRepository.save(company);
+
+		// Test
+		Company testCompany = companyRepository.findAll().get(0);
+		Set<Address> addressess = testCompany.getAddresses();
+		addresses.stream().forEach(address -> System.out.println(address.getAddressLine2()));
+
+
 	}
 
 	private void embeddableExample() {
